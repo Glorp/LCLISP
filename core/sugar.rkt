@@ -34,7 +34,8 @@
     ((lambda p x) (format "(λ (~a~a)" (~a p) (print-lambda-rest x)))
     ((app f a) (format "(~a ~a)" (print-app-f f) (pretty-print a)))
     ((vari x) (~a x))
-    ((fun p x _) (pretty-print (lambda p x)))))
+    ((fun p x _) (pretty-print (lambda p x)))
+    ((primitive x) (format "<primitive:~a>" (or (object-name x) x)))))
 
 (define (print-env e)
   (~a (map (λ (x) (format "(~a ~a)" (car x) (pretty-print (cdr x)))) e)))
