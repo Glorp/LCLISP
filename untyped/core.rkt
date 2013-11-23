@@ -6,7 +6,9 @@
          eval
          eval-aux
          get-env
-         primitive)
+         primitive
+         lookup
+         ext-env)
 
 (define (lookup name env)
   (cadr (or (assoc name env)

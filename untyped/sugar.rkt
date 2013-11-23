@@ -1,6 +1,7 @@
 #lang racket
 (require "core.rkt")
 (provide parse
+         parse-aux
          make-env
          pretty-print)
 
@@ -36,10 +37,7 @@
     ((vari x) (~a x))
     ((fun p x _) (pretty-print (lambda p x)))
     ((primitive x) (format "<primitive:~a>" (or (object-name x) x)))))
-
-(define (print-env e)
-  (~a (map (λ (x) (format "(~a ~a)" (car x) (pretty-print (cdr x)))) e)))
-                 
+               
 (define (print-lambda-rest x)
   (match x
     ((lambda p x) (format " ~a~a" p (print-lambda-rest x)))

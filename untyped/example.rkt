@@ -1,4 +1,4 @@
-#lang s-exp "core/lang.rkt"
+#lang s-exp "lang.rkt"
 
 (def id (λ (a) a))
 (def pair (λ (a d f) (f a d)))
