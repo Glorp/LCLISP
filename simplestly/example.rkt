@@ -12,7 +12,7 @@
   (syntax-rules ()
     ((_ x) (run-f (parse-typed x) env))))
 
-(run (c->i (((λ (x) (ifn false x (s x))) : (-> Nat Nat))
+(run (c->i (((λ (x) (ifn false x (s x))) : (Nat -> Nat))
                          (s 0))))
 
 (run (c->i (p (p (s (s (s (s 0))))))))

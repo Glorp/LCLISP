@@ -11,8 +11,8 @@
     ((_ Bool) (bool))
     ((_ Nat) (cnat))
     ((_ Unit) (unit))
-    ((_ (-> from to)) (funt (parse-type from) (parse-type to)))
-    ((_ (-> from to more ...)) (parse-type (-> (-> from to) more ...)))))
+    ((_ (from -> to)) (funt (parse-type from) (parse-type to)))
+    ((_ (from -> to -> more ...)) (parse-type (from -> (to -> more ...))))))
 
 (define-syntax parse-typed
   (syntax-rules (:)
