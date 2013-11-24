@@ -4,8 +4,10 @@
          "core.rkt")
 
 (define (run-f exp env)
-  (let ((t (typeof exp env)))
-    (annotated (eval exp env)
+  (let ((t (typeof exp env))
+        (e-exp (erase exp))
+        (e-env (erase-env env)))
+    (annotated (eval e-exp e-env)
                t)))
 
 (define-syntax run

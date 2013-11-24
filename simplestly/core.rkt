@@ -1,6 +1,5 @@
 #lang racket
-(require (except-in "../untyped/core.rkt"
-                    eval)
+(require "../untyped/core.rkt"
          (only-in "../untyped/sugar.rkt"
                   parse))
 
@@ -12,6 +11,8 @@
          annotated
          eval
          typeof
+         erase
+         erase-env
          env)
 
 (struct annotated (exp type) #:transparent)
@@ -24,16 +25,17 @@
 (struct bool () #:transparent)
 (struct int () #:transparent)
 
-(define (eval exp env)
-  (erase (eval-aux eval
-                   (erase exp)
-                   env)))
-
 (define (erase exp)
   (match exp
-    ((annotated x _) x)
-    ((no-really x _) x)
-    (x x)))
+    ((annotated x _) (erase x))
+    ((no-really x _) (erase x))
+    ((lambda p x) (lambda (erase p) (erase x)))
+    ((app f a) (app (erase f) (erase a)))
+    ((primitive x) exp)
+    ((var v) exp)))
+
+(define (erase-env env)
+  (map (λ (x) `(,(car x) ,(erase (cadr x)))) env))
 
 (define true (eval (parse (λ (a c) a)) '()))
 (define false (eval (parse (λ (a c) c)) '()))
