@@ -56,6 +56,7 @@
 (define (pretty-print x t)
   (format "~a : ~a"
           (match t
+            ((unit) "()")
             ((bool) (bool->string x))
             ((cnat) (cnat->string x))
             ((funt _ _) "<function>"))

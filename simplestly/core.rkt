@@ -59,7 +59,7 @@
 
 
 (define base-env
-  `((u ,(annotated id (unit)))
+  `((() ,(annotated id (unit)))
     (true ,(annotated true (bool)))
     (false ,(annotated false (bool)))
     (0 ,(annotated |0| (cnat)))
