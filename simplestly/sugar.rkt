@@ -16,6 +16,8 @@
 
 (define-syntax parse-typed
   (syntax-rules (:)
+    ((_ (λ (p : t) x)) (parse-typed (λ ((p : t)) x)))
+    ((_ (λ ((p : t)) x)) (lambda (param-type 'p (parse-type t)) (parse-typed x)))
     ((_ (x : t)) (annotated (parse-typed x) (parse-type t)))
     ((_ x) (parse-aux parse-typed x))))
 

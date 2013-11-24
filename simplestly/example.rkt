@@ -14,8 +14,13 @@
   (syntax-rules ()
     ((_ x) (run-f (parse-typed x) env))))
 
-(run (c->i (((λ (x) (ifn false x (s x))) : (Nat -> Nat))
-                         (s 0))))
+(run (c->i ((λ (x : Nat) (ifn false x (s x)))
+            (s 0))))
 
 (run (c->i (p (p (s (s (s (s 0))))))))
+
+(match (run (λ ((x : Nat) (y : Nat) (z : Bool)) z))
+  ((annotated _ t) t))
+
+(run ((λ ((x : Nat) (y : Nat) (z : Bool)) z) 0 0 false))
 

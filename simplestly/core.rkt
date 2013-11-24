@@ -3,13 +3,14 @@
          (only-in "../untyped/sugar.rkt"
                   parse))
 
-(provide cnat
+(provide (all-from-out "../untyped/core.rkt")
+         cnat
          unit
          bool
          funt
          int
          annotated
-         eval
+         param-type
          typeof
          erase
          erase-env
@@ -17,7 +18,7 @@
 
 (struct annotated (exp type) #:transparent)
 (struct no-really (exp type) #:transparent)
-
+(struct param-type (name type) #:transparent)
 
 (struct unit () #:transparent)
 (struct funt (from to) #:transparent)
@@ -29,6 +30,7 @@
   (match exp
     ((annotated x _) (erase x))
     ((no-really x _) (erase x))
+    ((lambda (param-type p t) exp) (lambda p (erase exp)))
     ((lambda p x) (lambda (erase p) (erase x)))
     ((app f a) (app (erase f) (erase a)))
     ((primitive x) exp)
@@ -81,8 +83,10 @@
     ((no-really _ t) t)
     ((app f a) (typecheck-app (typeof f env)
                               (typeof a env)))
+    ((lambda (param-type p t) x)
+     (funt t (typeof x (ext-env env p (no-really #f t)))))
     ((annotated (lambda p x) (funt from to))
-     (funt from (typecheck x to (ext-env env p (no-really #f from)))))
+     (typecheck (lambda (param-type p from) x) (funt from to) env))
     ((annotated x t) (typecheck x t env))))
 
 (define (typecheck exp expected env)
