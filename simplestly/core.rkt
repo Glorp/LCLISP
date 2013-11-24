@@ -8,7 +8,6 @@
          unit
          bool
          funt
-         int
          annotated
          param-type
          typeof
@@ -24,7 +23,6 @@
 (struct funt (from to) #:transparent)
 (struct cnat () #:transparent)
 (struct bool () #:transparent)
-(struct int () #:transparent)
 
 (define (erase exp)
   (match exp
@@ -57,11 +55,7 @@
                                   ((λ (a d f) (f a d)) (λ (f x) x) (λ (f x) x))))))
                 '()))
 
-(define (prim+1 x)
-  (match x ((primitive n) (primitive (+ n 1)))))
-(define c->i (primitive (λ (c) (eval (app (app c (primitive prim+1))
-                                                  (primitive 0))
-                                     '()))))
+
 
 (define env `((true ,(no-really true (bool)))
               (false ,(no-really false (bool)))
@@ -73,8 +67,7 @@
                                               (funt (cnat)
                                                     (cnat))))))
               (fixn ,(no-really y (funt (funt (funt (cnat) (cnat)) (funt (cnat) (cnat)))
-                                        (funt (cnat) (cnat)))))
-              (c->i ,(no-really c->i (funt (cnat) (int))))))
+                                        (funt (cnat) (cnat)))))))
 
 
 (define (typeof exp env)
