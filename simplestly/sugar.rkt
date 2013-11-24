@@ -19,7 +19,6 @@
   (syntax-rules (:)
     ((_ (λ (p : t) x)) (parse-typed (λ ((p : t)) x)))
     ((_ (λ ((p : t)) x)) (lambda (param-type 'p (parse-type t)) (parse-typed x)))
-    ((_ (x : t)) (annotated (parse-typed x) (parse-type t)))
     ((_ x) (parse-aux parse-typed x))))
 
 (define (prim+1 x)
@@ -44,6 +43,7 @@
 
 (define (pretty-print-type t)
   (match t
+    ((unit) "Unit")
     ((bool) "Bool")
     ((cnat) "Nat")
     ((funt from to) (format "(~a -> ~a)" (pretty-print-type from) (pretty-print-fun-type to)))))

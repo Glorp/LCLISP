@@ -13,10 +13,9 @@
          typeof
          erase
          erase-env
-         env)
+         base-env)
 
 (struct annotated (exp type) #:transparent)
-(struct no-really (exp type) #:transparent)
 (struct param-type (name type) #:transparent)
 
 (struct unit () #:transparent)
@@ -27,9 +26,8 @@
 (define (erase exp)
   (match exp
     ((annotated x _) (erase x))
-    ((no-really x _) (erase x))
     ((lambda (param-type p t) exp) (lambda p (erase exp)))
-    ((lambda p x) (lambda (erase p) (erase x)))
+    ((lambda p x) (lambda p (erase x)))
     ((app f a) (app (erase f) (erase a)))
     ((primitive x) exp)
     ((var v) exp)))
@@ -37,11 +35,14 @@
 (define (erase-env env)
   (map (λ (x) `(,(car x) ,(erase (cadr x)))) env))
 
+(define id (eval (parse (λ (x) x)) '()))
 (define true (eval (parse (λ (a c) a)) '()))
 (define false (eval (parse (λ (a c) c)) '()))
-(define if-f (eval (parse (λ (b a c) (b a c))) '()))
+(define if-f (eval (parse (λ (b a c) ((b a c) (λ (x) x)))) '()))
 (define |0| (eval (parse (λ (f x) x)) '()))
 (define s (eval (parse (λ (n f x) (f (n f x)))) '()))
+(define |0?| (eval (parse (λ (n) (n (λ (_) (λ (a c) c)) (λ (a c) a)))) '()))
+
 (define y (eval (parse (λ (f)
                          ((λ (x) (x x))
                           (λ (g)
@@ -57,39 +58,30 @@
 
 
 
-(define env `((true ,(no-really true (bool)))
-              (false ,(no-really false (bool)))
-              (0 ,(no-really |0| (cnat)))
-              (s ,(no-really s (funt (cnat) (cnat))))
-              (p ,(no-really p (funt (cnat) (cnat))))
-              (ifn ,(no-really if-f (funt (bool)
-                                        (funt (cnat)
-                                              (funt (cnat)
-                                                    (cnat))))))
-              (fixn ,(no-really y (funt (funt (funt (cnat) (cnat)) (funt (cnat) (cnat)))
-                                        (funt (cnat) (cnat)))))))
+(define base-env
+  `((u ,(annotated id (unit)))
+    (true ,(annotated true (bool)))
+    (false ,(annotated false (bool)))
+    (0 ,(annotated |0| (cnat)))
+    (0? ,(annotated |0?| (funt (cnat) (bool))))
+    (s ,(annotated s (funt (cnat) (cnat))))
+    (p ,(annotated p (funt (cnat) (cnat))))
+    (ifn ,(annotated if-f (funt (bool)
+                                (funt (funt (unit) (cnat))
+                                      (funt (funt (unit) (cnat))
+                                            (cnat))))))
+    (fixn ,(annotated y (funt (funt (funt (cnat) (cnat)) (funt (cnat) (cnat)))
+                              (funt (cnat) (cnat)))))))
 
 
 (define (typeof exp env)
   (match exp
-    ((vari v) (type-from-an (lookup v env)))
-    ((no-really _ t) t)
+    ((vari v) (annotated-type (lookup v env)))
+    ((annotated _ t) t)
     ((app f a) (typecheck-app (typeof f env)
                               (typeof a env)))
     ((lambda (param-type p t) x)
-     (funt t (typeof x (ext-env env p (no-really #f t)))))
-    ((annotated (lambda p x) (funt from to))
-     (typecheck (lambda (param-type p from) x) (funt from to) env))
-    ((annotated x t) (typecheck x t env))))
-
-(define (typecheck exp expected env)
-  (let ((type (typeof exp env)))
-    (if (equal? type expected)
-        type
-        (error (format "Type mismatch. Found: ~a. Expected: ~a."
-                       type
-                       expected)))))
-
+     (funt t (typeof x (ext-env env p (annotated #f t)))))))
 
 (define (typecheck-app ft at)
   (match ft
@@ -99,9 +91,4 @@
          (error (format "Type mismatch. Parameter: ~a. Argument: ~a."
                         pt
                         at))))))
-
-(define (type-from-an exp)
-  (match exp
-    ((annotated _ t) t)
-    ((no-really _ t) t)))
 
